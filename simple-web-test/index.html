@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vibe Trace - Simple Test</title>
+    <script src="https://browser.sentry-cdn.com/7.99.0/bundle.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+        }
+        h1 {
+            color: #2b1434;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+        .subtitle {
+            color: #6c5fc7;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+        .info-box {
+            background: #f6f3f8;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #6c5fc7;
+        }
+        .info-box strong {
+            color: #6c5fc7;
+        }
+        .info-box code {
+            background: #e3e0e8;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        button {
+            background: #6c5fc7;
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin: 10px 0;
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            background: #5849b3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(108, 95, 199, 0.4);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        .secondary {
+            background: #e3e0e8;
+            color: #2b1434;
+        }
+        .secondary:hover {
+            background: #d1c8db;
+        }
+        .success {
+            background: #e6f7ed;
+            color: #1e7a46;
+            padding: 16px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #1e7a46;
+        }
+        .error {
+            background: #f7e6e6;
+            color: #7a1e1e;
+            padding: 16px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #7a1e1e;
+        }
+        .steps {
+            background: #f9f8fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .steps ol {
+            margin-left: 20px;
+        }
+        .steps li {
+            margin: 10px 0;
+            line-height: 1.6;
+        }
+        a {
+            color: #6c5fc7;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 Vibe Trace Test</h1>
+        <p class="subtitle">Simple Web App for Testing Sentry Integration</p>
+
+        <div class="info-box">
+            <strong>Current Commit:</strong> <code id="commit">bce8250b</code><br>
+            <strong>Session ID:</strong> <code id="session">2e3cc9ef-539a-44ca-a6b2-1fb0613d896e</code><br>
+            <strong>MCP Server:</strong> <code>http://localhost:8080</code>
+        </div>
+
+        <button onclick="triggerError()">🔥 Send Error to Sentry</button>
+        <button class="secondary" onclick="testMCP()">🔍 Test MCP Server</button>
+
+        <div id="result"></div>
+
+        <div class="steps">
+            <h3 style="margin-bottom: 15px;">📋 Test Steps:</h3>
+            <ol>
+                <li>Click "Send Error to Sentry" button above</li>
+                <li>Open <a href="https://antonis-b7.sentry.io/issues/" target="_blank">Sentry Dashboard</a></li>
+                <li>Find the new error (appears in 1-2 seconds)</li>
+                <li>Look for <strong>"🤖 AI Trace"</strong> section (requires Tampermonkey)</li>
+                <li>Click "🚀 Open in Claude Code" to test deep link</li>
+            </ol>
+        </div>
+
+        <div class="info-box">
+            <strong>⚠️ Required:</strong> Install <a href="https://www.tampermonkey.net/" target="_blank">Tampermonkey</a>
+            + <code>vibe-trace-userscript-v2.js</code> to see AI Trace section
+        </div>
+    </div>
+
+    <script>
+        const COMMIT_HASH = 'bce8250b6cfd0a8933e280bf34e5b9913c144b6c';
+        const SESSION_ID = '2e3cc9ef-539a-44ca-a6b2-1fb0613d896e';
+        const MCP_SERVER = 'http://localhost:8080';
+
+        // Initialize Sentry
+        Sentry.init({
+            dsn: 'https://b3b20672fd08106a76def6a4cae01f69@o4510047037489152.ingest.de.sentry.io/4510906410401872',
+            release: `vibetrace-test@1.0.0+${COMMIT_HASH}`,
+            environment: 'vercel-test',
+            debug: true,
+            beforeSend(event) {
+                // Add git commit tag
+                event.tags = event.tags || {};
+                event.tags['git_commit'] = COMMIT_HASH;
+                event.tags['vibetrace.has_trace'] = 'true';
+                event.tags['test_source'] = 'simple-web-test';
+
+                console.log('📤 Sending to Sentry:', event);
+                return event;
+            }
+        });
+
+        async function triggerError() {
+            const result = document.getElementById('result');
+            result.innerHTML = '<div class="info-box">⏳ Sending error to Sentry...</div>';
+
+            try {
+                // Trigger a realistic error with stack trace
+                const data = { items: [] };
+                const user = data.items.find(item => item.id === 999);
+                // This will throw: Cannot read properties of undefined
+                console.log(user.name);
+            } catch (error) {
+                // Capture in Sentry
+                const eventId = Sentry.captureException(error, {
+                    tags: {
+                        'test.type': 'web_app_test',
+                        'feature': 'user_lookup'
+                    },
+                    extra: {
+                        user_id: 999,
+                        timestamp: new Date().toISOString()
+                    }
+                });
+
+                result.innerHTML = `
+                    <div class="success">
+                        ✅ <strong>Error sent successfully!</strong><br><br>
+                        Event ID: <code>${eventId}</code><br><br>
+                        <strong>Next:</strong><br>
+                        1. Open <a href="https://antonis-b7.sentry.io/issues/" target="_blank">Sentry Dashboard</a><br>
+                        2. Find error with commit <code>${COMMIT_HASH.substring(0, 7)}</code><br>
+                        3. Look for "🤖 AI Trace" section<br>
+                        4. Click "🚀 Open in Claude Code"
+                    </div>
+                `;
+
+                console.log('✅ Event sent:', eventId);
+            }
+        }
+
+        async function testMCP() {
+            const result = document.getElementById('result');
+            result.innerHTML = '<div class="info-box">⏳ Testing MCP server...</div>';
+
+            try {
+                // Test health endpoint
+                const healthResponse = await fetch(`${MCP_SERVER}/health`);
+                const healthData = await healthResponse.json();
+
+                // Test trace lookup
+                const traceResponse = await fetch(`${MCP_SERVER}/v2/traces/by-commit/${COMMIT_HASH}`);
+                const traceData = await traceResponse.json();
+
+                result.innerHTML = `
+                    <div class="success">
+                        ✅ <strong>MCP Server is working!</strong><br><br>
+                        <strong>Health:</strong> ${healthData.status}<br>
+                        <strong>Service:</strong> ${healthData.service}<br><br>
+                        <strong>Trace Found:</strong> ${traceData.found ? 'Yes ✅' : 'No ❌'}<br>
+                        ${traceData.found ? `
+                            <strong>Session:</strong> <code>${traceData.metadata.session_id.substring(0, 16)}...</code><br>
+                            <strong>Model:</strong> ${traceData.metadata.model_id}<br>
+                            <strong>Conversation:</strong> ${traceData.metadata.summary || 'N/A'}
+                        ` : ''}
+                    </div>
+                `;
+
+                console.log('✅ MCP Server test passed');
+                console.log('Health:', healthData);
+                console.log('Trace:', traceData);
+            } catch (error) {
+                result.innerHTML = `
+                    <div class="error">
+                        ❌ <strong>MCP Server Error</strong><br><br>
+                        ${error.message}<br><br>
+                        Make sure server is running:<br>
+                        <code>cd mcp-server && python3 server.py</code>
+                    </div>
+                `;
+                console.error('❌ MCP test failed:', error);
+            }
+        }
+
+        // Test MCP on load
+        window.addEventListener('load', () => {
+            console.log('🤖 Vibe Trace Test App loaded');
+            console.log('Commit:', COMMIT_HASH);
+            console.log('Session:', SESSION_ID);
+            console.log('MCP Server:', MCP_SERVER);
+        });
+    </script>
+</body>
+</html>

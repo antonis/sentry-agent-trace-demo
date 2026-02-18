@@ -1,2 +1,113 @@
 # Sentry Agent Trace Demo
-Browser-based demo for testing Sentry Agent Trace integration
+
+A browser-based demo for testing the **Agent Trace** feature in Sentry - linking AI-generated code errors back to the AI conversation that created them.
+
+## 🎯 What This Demo Does
+
+Shows how errors in production can be traced back to the AI conversation (Claude Code, Cursor, etc.) that generated the code.
+
+## 🚀 Quick Start
+
+### 1. Open the Demo Page
+
+```bash
+open simple-web-test/index.html
+```
+
+### 2. Test the Flow
+
+1. **Click "🔥 Send Error to Sentry"** - Sends test error to your Sentry project
+2. **View in Sentry** - Open your Sentry dashboard
+3. **See Agent Trace Section** - Shows the AI conversation that led to this code
+
+## 📋 What You'll See
+
+```
+▼ Agent Trace
+
+  Session ID    2e3cc9ef-539a-44ca-a6b2-1fb0613d896e  [📋 copy]
+  Model         anthropic/claude-sonnet-4-5
+  Summary       Current conversation summary
+
+  [🚀 Open in Claude Code]
+
+  ▶ View Conversation (1761 turns)
+    👤 User: I want to implement feature X...
+    🤖 Assistant: I'll help you build that...
+    ...
+```
+
+## 🔧 Configuration
+
+Edit `simple-web-test/index.html` to configure:
+
+```javascript
+// Your Sentry DSN
+const DSN = 'https://YOUR_KEY@YOUR_ORG.ingest.sentry.io/YOUR_PROJECT';
+
+// Current git commit hash (links to AI conversation)
+const COMMIT_HASH = 'abc123...';
+
+// Your MCP server URL
+const MCP_SERVER = 'http://localhost:8080';
+```
+
+## 📚 Documentation
+
+- **[VERCEL_TESTING.md](./VERCEL_TESTING.md)** - Deploy to Vercel with ngrok
+- **[VERCEL_DEPLOYMENT.md](./VERCEL_DEPLOYMENT.md)** - Production deployment guide
+- **[API_KEY_SETUP.md](./API_KEY_SETUP.md)** - MCP server authentication setup
+
+## 🏗️ Architecture
+
+```
+Browser (Demo Page)
+    ↓ Sends error
+Sentry (Issue Details)
+    ↓ Fetches trace data
+MCP Server (Local/ngrok/Deployed)
+    ↓ Returns conversation
+Agent Trace UI
+    ✓ Shows AI conversation
+    ✓ Deep links to IDE
+    ✓ Session metadata
+```
+
+## 🔐 Security
+
+- **API Key Authentication** - MCP server requires `X-API-Key` header
+- **Optional IP Whitelisting** - Restrict to specific domains/IPs
+- **Temporary Exposure** - Use ngrok for testing, deploy properly for production
+
+## ✨ Features
+
+✅ **Session ID with copy button** - Easy to share and reference
+✅ **Model information** - Shows which AI model generated the code
+✅ **Conversation preview** - See the AI discussion that led to this code
+✅ **Deep links** - Click to open conversation in Claude Code/Cursor
+✅ **No demo data** - Works with real AI conversations
+
+## 🎓 Use Cases
+
+- **Debug AI-generated code** - See the context that created the bug
+- **Code review** - Understand the reasoning behind implementation choices
+- **Team collaboration** - Share AI conversation context with teammates
+- **Learning** - Study how AI solved similar problems before
+
+## 📝 Requirements
+
+- Sentry account (free tier works)
+- MCP server running (for conversation storage)
+- Claude Code or Cursor (for conversation capture)
+
+## 🤝 Contributing
+
+This is a demo project. For the full implementation, see the main Vibe Trace repository.
+
+## 📄 License
+
+MIT License - See main repository for details
+
+---
+
+**Built with** [Claude Code](https://claude.com/claude-code) 🤖
