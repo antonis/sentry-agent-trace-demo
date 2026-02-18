@@ -1,27 +1,65 @@
 ---
 name: vibetrace
-description: Export current session as agent-trace and upload to Vibe Trace server
-argument-hint: [commit-hash]
+description: Commit changes and export session to Vibe Trace in one step
+argument-hint: [-m "commit message"]
 ---
 
 # Vibe Trace Export Skill
 
-This skill exports the current Claude Code session in agent-trace format and uploads it to the Vibe Trace MCP server for linking with Sentry error reports.
+This skill automatically commits your changes and exports the current Claude Code session in agent-trace format to the Vibe Trace MCP server.
 
 ## Usage
 
 ```
-/vibetrace [commit-hash]
+/vibetrace -m "Your commit message"
 ```
 
-- If `commit-hash` is provided, export conversation for that commit
-- If omitted, use the current HEAD commit
+or simply:
+
+```
+/vibetrace
+```
+
+- If `-m "message"` is provided, uses that commit message
+- If omitted, uses default message: "Update from Claude Code session"
+- Automatically stages all changes, commits, and exports the session
 
 ## Workflow
 
-You must execute the following steps:
+You must execute the following steps in order:
 
-### 1. Determine Session ID
+### 1. Check for Uncommitted Changes
+
+```bash
+# Check if there are changes to commit
+git status --porcelain
+```
+
+If no changes, inform the user and exit. Otherwise, proceed.
+
+### 2. Parse Commit Message Argument
+
+Extract commit message from arguments:
+- If user provided `-m "message"`, use that
+- Otherwise, use default: "Update from Claude Code session"
+
+### 3. Stage and Commit Changes
+
+```bash
+# Stage all changes
+git add -A
+
+# Commit with message
+git commit -m "Your commit message here
+
+Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
+
+# Get the commit hash that was just created
+COMMIT_HASH=$(git rev-parse HEAD)
+echo "📝 Created commit: $COMMIT_HASH"
+```
+
+### 4. Determine Session ID
 
 The current session ID is available in the environment. Extract it from the context or detect it from the project path.
 
@@ -29,7 +67,7 @@ Project path format: `~/.claude/projects/<safe-path>/<session-id>.jsonl`
 
 Where `<safe-path>` is the project directory with slashes replaced by dashes.
 
-### 2. Locate Session JSONL File
+### 5. Locate Session JSONL File
 
 Use the Bash tool to find the session file:
 
@@ -41,27 +79,19 @@ PROJECT_ROOT=$(git rev-parse --show-toplevel)
 # Example: /Users/antonis/git/vibetrace → -Users-antonis-git-vibetrace
 SAFE_PATH=$(echo "$PROJECT_ROOT" | sed 's/^/-/' | tr '/' '-')
 
-# List session files
+# List session files (most recent first)
 ls -lt ~/.claude/projects/$SAFE_PATH/*.jsonl | head -5
 ```
 
 If the current session ID is known, use it directly. Otherwise, use the most recently modified JSONL file.
 
-### 3. Get Target Commit Hash
-
-```bash
-# If argument provided, use it; otherwise use HEAD
-COMMIT_HASH=${1:-$(git rev-parse HEAD)}
-echo $COMMIT_HASH
-```
-
-### 4. Get Files Changed in Commit
+### 6. Get Files Changed in Commit
 
 ```bash
 git diff --name-only $COMMIT_HASH^..$COMMIT_HASH
 ```
 
-### 5. Convert to Agent-trace Format
+### 7. Convert to Agent-trace Format
 
 Use the Python conversion script with the Bash tool:
 
