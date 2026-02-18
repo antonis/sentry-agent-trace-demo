@@ -133,7 +133,7 @@ PYTHON_SCRIPT
 
 Pass arguments: `<session-jsonl-path> <commit-hash> <project-root>`
 
-### 6. Upload to MCP Server
+### 8. Upload to MCP Server
 
 Use the Bash tool to POST the data:
 
@@ -171,39 +171,56 @@ print(response.json())
 PYTHON_SCRIPT
 ```
 
-### 7. Output Confirmation
+### 9. Output Confirmation
 
 Display a success message to the user with:
+- Commit hash (with short version)
+- Commit message
+- Files changed
 - Trace ID
-- Commit hash
-- Number of files attributed
 - Number of attributions created
 
 Example output:
 
 ```
-✅ Vibe Trace export successful!
+✅ Changes committed and exported to Vibe Trace!
+
+📝 Commit: abc123d "Add crash button for testing"
+📁 Files changed: 2
+   - simple-web-test/index.html
+   - README.md
 
 📦 Trace ID: 12345678-1234-1234-1234-123456789abc
-🔗 Commit: abc123def456
-📝 Files attributed: 3
-🎯 Attributions created: 12
+🎯 Attributions created: 5
 
-Your conversation is now linked to this commit and will appear in Sentry error reports.
+Your conversation is now linked to commit abc123d and will appear in Sentry error reports.
 ```
 
 ## Error Handling
 
-- If session JSONL file not found, inform the user and suggest checking the project path
-- If MCP server is not running, provide clear instructions to start it:
+- **No changes to commit:** Inform user that there are no uncommitted changes
+- **Git commit fails:** Display the error (e.g., merge conflict, hooks failing)
+- **Session JSONL not found:** Inform user and suggest checking project path
+- **MCP server not running:** Provide clear instructions:
   ```
   cd /Users/antonis/git/vibetrace/mcp-server
   python3 server.py
   ```
-- If conversion fails, display the error message and suggest checking the JSONL format
+- **Conversion fails:** Display the error message and suggest checking JSONL format
+- **Upload fails:** Check if MCP server is accessible and API key is configured
 
 ## Notes
 
-- The MCP server must be running on `http://localhost:8080`
-- This skill is project-specific and designed for the Vibe Trace development workflow
-- The agent-trace format ensures compatibility with standard tracing tools
+- **Automatic workflow:** This skill commits AND exports in one step
+- **Git integration:** Automatically stages all changes with `git add -A`
+- **Co-authorship:** Commits include `Co-Authored-By: Claude Sonnet 4.5` tag
+- **MCP server required:** Must be running on `http://localhost:8080`
+- **Agent-trace format:** Ensures compatibility with standard tracing tools
+- **Session linking:** The commit hash links your code to this conversation
+
+## Benefits
+
+✅ **One command** instead of commit → export → link
+✅ **Never forget** to export after committing
+✅ **Automatic linking** ensures commits always have conversation context
+✅ **Clean workflow** for AI-assisted development
