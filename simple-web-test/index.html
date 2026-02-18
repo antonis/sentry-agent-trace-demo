@@ -123,9 +123,9 @@
         <p class="subtitle">Simple Web App for Testing Sentry Integration</p>
 
         <div class="info-box">
-            <strong>Current Commit:</strong> <code id="commit-display"></code><br>
-            <strong>Session ID:</strong> <code id="session">2e3cc9ef-539a-44ca-a6b2-1fb0613d896e</code><br>
-            <strong>MCP Server:</strong> <code>http://localhost:8080</code>
+            <strong>Release:</strong> <code id="release-display"></code><br>
+            <strong>MCP Server:</strong> <code>http://localhost:8080</code><br>
+            <strong>Detection:</strong> Sentry's Suspect Commits (automatic)
         </div>
 
         <button onclick="triggerError()">🔥 Send Error to Sentry</button>
@@ -139,14 +139,17 @@
                 <li>Click "Send Error to Sentry" button above</li>
                 <li>Open <a href="https://antonis-b7.sentry.io/issues/" target="_blank">Sentry Dashboard</a></li>
                 <li>Find the new error (appears in 1-2 seconds)</li>
-                <li>Look for <strong>"🤖 AI Trace"</strong> section (requires Tampermonkey)</li>
-                <li>Click "🚀 Open in Claude Code" to test deep link</li>
+                <li>Look for <strong>"Agent Trace"</strong> section</li>
+                <li>Verify it shows your AI conversation</li>
+                <li>Click "Open in Claude Code" to test deep link</li>
             </ol>
         </div>
 
         <div class="info-box">
-            <strong>⚠️ Required:</strong> Install <a href="https://www.tampermonkey.net/" target="_blank">Tampermonkey</a>
-            + <code>vibe-trace-userscript-v2.js</code> to see AI Trace section
+            <strong>🔧 Setup Required:</strong><br>
+            • MCP server running locally<br>
+            • ngrok tunnel (for Vercel testing)<br>
+            • <strong>Optional:</strong> Connect GitHub repo in Sentry for automatic suspect commit detection
         </div>
     </div>
 
@@ -158,15 +161,17 @@
         const MCP_SERVER = 'http://localhost:8080';
 
         // Initialize Sentry
+        // NOTE: Commit hash is embedded in release field (standard practice)
+        // Sentry's "Suspect Commits" feature will automatically detect the commit
+        // from stack traces if GitHub integration is enabled
         Sentry.init({
             dsn: 'https://b3b20672fd08106a76def6a4cae01f69@o4510047037489152.ingest.de.sentry.io/4510906410401872',
             release: `vibetrace-test@1.0.0+${COMMIT_HASH}`,
-            environment: 'vercel-test',
+            environment: 'demo',
             debug: true,
             beforeSend(event) {
-                // Add git commit tag
+                // Tag for filtering (not used for commit detection)
                 event.tags = event.tags || {};
-                event.tags['git_commit'] = COMMIT_HASH;
                 event.tags['vibetrace.has_trace'] = 'true';
                 event.tags['test_source'] = 'simple-web-test';
 
@@ -259,13 +264,16 @@
 
         // Test MCP on load
         window.addEventListener('load', () => {
-            // Update commit display
-            document.getElementById('commit-display').textContent = COMMIT_HASH.substring(0, 8);
+            // Update release display
+            const release = `vibetrace-test@1.0.0+${COMMIT_HASH.substring(0, 8)}`;
+            document.getElementById('release-display').textContent = release;
 
             console.log('🤖 Vibe Trace Test App loaded');
-            console.log('Commit:', COMMIT_HASH);
-            console.log('Session:', SESSION_ID);
+            console.log('Release:', `vibetrace-test@1.0.0+${COMMIT_HASH}`);
             console.log('MCP Server:', MCP_SERVER);
+            console.log('');
+            console.log('💡 Commit detection: Sentry Suspect Commits (automatic)');
+            console.log('   Fallback: Release field format');
         });
     </script>
 </body>

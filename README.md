@@ -50,6 +50,20 @@ open simple-web-test/index.html
     ...
 ```
 
+## 🔍 How Commit Detection Works
+
+The Agent Trace feature uses **Sentry's Suspect Commits** to automatically link errors to code:
+
+1. **Priority 1: Suspect Commits (Automatic)**
+   - Sentry's GitHub integration analyzes stack traces
+   - Determines which commit likely caused the error
+   - Agent Trace fetches conversation for that commit
+
+2. **Priority 2: Release Field (Fallback)**
+   - Standard format: `app@version+commithash`
+   - Used by production apps worldwide
+   - No GitHub integration required
+
 ## 🧪 End-to-End Testing
 
 Want to test the full flow with your own code changes?
@@ -99,6 +113,8 @@ The `/vibetrace` skill is sufficient for testing. Git hooks are only needed for 
 
 ## 🔧 Configuration
 
+### Sentry Setup
+
 Edit `simple-web-test/index.html` to configure:
 
 ```javascript
@@ -109,7 +125,22 @@ const DSN = 'https://YOUR_KEY@YOUR_ORG.ingest.sentry.io/YOUR_PROJECT';
 const MCP_SERVER = 'http://localhost:8080';
 ```
 
-**Note:** Commit hash is now passed via URL parameter, no need to hardcode!
+### Enable Suspect Commits (Optional but Recommended)
+
+For automatic commit detection without manual tagging:
+
+1. Go to **Sentry → Settings → Integrations**
+2. Install **GitHub** integration
+3. Connect your repository
+4. Sentry will automatically detect suspect commits from stack traces
+
+**Benefits:**
+- ✅ No manual commit hash injection needed
+- ✅ Works for all errors automatically
+- ✅ More accurate blame tracking
+- ✅ Links directly to GitHub commits
+
+**Without GitHub integration:** Falls back to release field (still works!)
 
 ## 📚 Documentation
 
