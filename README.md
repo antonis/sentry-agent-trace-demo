@@ -8,13 +8,26 @@ Shows how errors in production can be traced back to the AI conversation (Claude
 
 ## 🚀 Quick Start
 
-### 1. Open the Demo Page
+### Option A: Test Latest Commit (Recommended)
 
 ```bash
+# After making changes and committing
+./test-latest-commit.sh
+```
+
+This automatically opens the test page with your latest commit hash.
+
+### Option B: Manual Testing
+
+```bash
+# Test with specific commit
+open "simple-web-test/index.html?commit=$(git rev-parse HEAD)"
+
+# Or use default commit
 open simple-web-test/index.html
 ```
 
-### 2. Test the Flow
+### Test the Flow
 
 1. **Click "🔥 Send Error to Sentry"** - Sends test error to your Sentry project
 2. **View in Sentry** - Open your Sentry dashboard
@@ -37,6 +50,53 @@ open simple-web-test/index.html
     ...
 ```
 
+## 🧪 End-to-End Testing
+
+Want to test the full flow with your own code changes?
+
+### E2E Workflow
+
+1. **Start infrastructure:**
+   ```bash
+   # Terminal 1: Start MCP server
+   cd /path/to/vibetrace/mcp-server
+   python3 server.py
+
+   # Terminal 2: Expose with ngrok (if testing on Vercel)
+   ngrok http 8080
+   ```
+
+2. **Make changes in Claude Code:**
+   ```bash
+   # Add your feature, fix a bug, whatever
+   # Commit the changes
+   git add . && git commit -m "Add feature X"
+   ```
+
+3. **Capture the session:**
+   ```bash
+   # In Claude Code, run:
+   /vibetrace
+
+   # Or manually specify commit:
+   /vibetrace $(git rev-parse HEAD)
+   ```
+
+4. **Test the commit:**
+   ```bash
+   ./test-latest-commit.sh
+   # Opens browser with your commit → click error button
+   ```
+
+5. **Verify in Sentry:**
+   - Go to your Sentry dashboard
+   - Find the new error
+   - Agent Trace section shows YOUR conversation!
+
+### No Git Hook Needed!
+
+The `/vibetrace` skill is sufficient for testing. Git hooks are only needed for automatic capture on every commit.
+
 ## 🔧 Configuration
 
 Edit `simple-web-test/index.html` to configure:
@@ -45,12 +105,11 @@ Edit `simple-web-test/index.html` to configure:
 // Your Sentry DSN
 const DSN = 'https://YOUR_KEY@YOUR_ORG.ingest.sentry.io/YOUR_PROJECT';
 
-// Current git commit hash (links to AI conversation)
-const COMMIT_HASH = 'abc123...';
-
-// Your MCP server URL
+// MCP server URL
 const MCP_SERVER = 'http://localhost:8080';
 ```
+
+**Note:** Commit hash is now passed via URL parameter, no need to hardcode!
 
 ## 📚 Documentation
 
