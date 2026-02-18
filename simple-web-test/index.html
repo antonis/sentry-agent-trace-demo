@@ -123,7 +123,7 @@
         <p class="subtitle">Simple Web App for Testing Sentry Integration</p>
 
         <div class="info-box">
-            <strong>Current Commit:</strong> <code id="commit">bce8250b</code><br>
+            <strong>Current Commit:</strong> <code id="commit-display"></code><br>
             <strong>Session ID:</strong> <code id="session">2e3cc9ef-539a-44ca-a6b2-1fb0613d896e</code><br>
             <strong>MCP Server:</strong> <code>http://localhost:8080</code>
         </div>
@@ -151,7 +151,9 @@
     </div>
 
     <script>
-        const COMMIT_HASH = 'bce8250b6cfd0a8933e280bf34e5b9913c144b6c';
+        // Allow commit hash override via URL parameter: ?commit=abc123
+        const urlParams = new URLSearchParams(window.location.search);
+        const COMMIT_HASH = urlParams.get('commit') || 'bce8250b6cfd0a8933e280bf34e5b9913c144b6c';
         const SESSION_ID = '2e3cc9ef-539a-44ca-a6b2-1fb0613d896e';
         const MCP_SERVER = 'http://localhost:8080';
 
@@ -257,6 +259,9 @@
 
         // Test MCP on load
         window.addEventListener('load', () => {
+            // Update commit display
+            document.getElementById('commit-display').textContent = COMMIT_HASH.substring(0, 8);
+
             console.log('🤖 Vibe Trace Test App loaded');
             console.log('Commit:', COMMIT_HASH);
             console.log('Session:', SESSION_ID);
