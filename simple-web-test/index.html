@@ -130,7 +130,6 @@
 
         <button onclick="triggerError()">🔥 Send Error to Sentry</button>
         <button class="secondary" onclick="testMCP()">🔍 Test MCP Server</button>
-        <button class="secondary" onclick="divisionByZero()">➗ Division by Zero</button>
 
         <div id="result"></div>
 
@@ -260,30 +259,6 @@
                     </div>
                 `;
                 console.error('❌ MCP test failed:', error);
-            }
-        }
-
-        function divisionByZero() {
-            const result = document.getElementById('result');
-            try {
-                const a = 1;
-                const b = 0;
-                const value = a / b;
-                if (!isFinite(value)) {
-                    throw new Error(`Division by zero: ${a} / ${b} = ${value}`);
-                }
-            } catch (error) {
-                const eventId = Sentry.captureException(error, {
-                    tags: { 'test.type': 'division_by_zero' }
-                });
-                result.innerHTML = `
-                    <div class="error">
-                        ❌ <strong>Division by Zero!</strong><br><br>
-                        ${error.message}<br><br>
-                        Event ID: <code>${eventId}</code>
-                    </div>
-                `;
-                console.error('Division by zero captured:', eventId);
             }
         }
 
