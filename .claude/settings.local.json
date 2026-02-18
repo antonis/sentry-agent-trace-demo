@@ -3,7 +3,8 @@
     "allow": [
       "Bash(git -C /Users/antonis/git/sentry-agent-trace-demo status --porcelain)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(ls:*)"
     ]
   }
 }
