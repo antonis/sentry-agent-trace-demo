@@ -171,7 +171,7 @@ print(response.json())
 PYTHON_SCRIPT
 ```
 
-### 9. Output Confirmation
+### 9. Output Confirmation and Open Demo App
 
 Display a success message to the user with:
 - Commit hash (with short version)
@@ -179,6 +179,22 @@ Display a success message to the user with:
 - Files changed
 - Trace ID
 - Number of attributions created
+
+Then automatically open the demo app with the commit hash.
+
+Example workflow:
+
+```bash
+# Get the commit hash (already have from step 3)
+COMMIT_HASH=$(git rev-parse HEAD)
+SHORT_HASH=$(git rev-parse --short HEAD)
+
+# Construct demo app URL with commit parameter
+DEMO_URL="file://$(pwd)/simple-web-test/index.html?commit=$COMMIT_HASH"
+
+# Open in browser
+open "$DEMO_URL"
+```
 
 Example output:
 
@@ -193,7 +209,15 @@ Example output:
 📦 Trace ID: 12345678-1234-1234-1234-123456789abc
 🎯 Attributions created: 5
 
-Your conversation is now linked to commit abc123d and will appear in Sentry error reports.
+🌐 Opening demo app with commit abc123d...
+   URL: file:///Users/antonis/git/sentry-agent-trace-demo/simple-web-test/index.html?commit=abc123d...
+
+Your conversation is now linked to commit abc123d.
+
+Next steps:
+1. The demo app is now open in your browser
+2. Click any error button to trigger a crash
+3. Go to Sentry to see the Agent Trace with your conversation!
 ```
 
 ## Error Handling

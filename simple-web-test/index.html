@@ -131,6 +131,7 @@
         <button onclick="triggerError()">🔥 Send Error to Sentry</button>
         <button class="secondary" onclick="testMCP()">🔍 Test MCP Server</button>
         <button class="secondary" onclick="divisionByZero()">➗ Division by Zero</button>
+        <button class="secondary" onclick="accessUndefined()">💥 Access Undefined Property</button>
 
         <div id="result"></div>
 
@@ -285,6 +286,14 @@
                 `;
                 console.error('Division by zero captured:', eventId);
             }
+        }
+
+        function accessUndefined() {
+            const result = document.getElementById('result');
+            const user = undefined;
+            // This throws: Cannot read properties of undefined (reading 'profile')
+            const profile = user.profile;
+            console.log(profile.name);
         }
 
         // Test MCP on load

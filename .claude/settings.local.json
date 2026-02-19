@@ -4,7 +4,9 @@
       "Bash(git -C /Users/antonis/git/sentry-agent-trace-demo status --porcelain)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(git -C /Users/antonis/git/sentry-agent-trace-demo diff --name-only 4956ac3^..4956ac3)",
+      "Bash(python3:*)"
     ]
   }
 }
